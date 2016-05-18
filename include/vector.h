@@ -28,35 +28,19 @@
 /*   ' ') '( (/                                                                                                      */
 /*     '   '  `                                                                                                      */
 /*********************************************************************************************************************/
-#include <stdio.h>
-#include "macu.h"
-#include "vector.h"
+#ifndef _VECTOR_H_
+#define _VECTOR_H_
 
-void vector_test()
-{
-    struct vector v;
-    vector_init(&v);
+#include <stddef.h>
 
-    /* Apend test data to vector */
-    vector_append(&v, 5);
-    vector_append(&v, 1);
-    vector_append(&v, 8);
-    vector_append(&v, 7);
+struct vector {
+    long* data;
+    size_t capacity;
+    size_t size;
+};
 
-    /* Show them */
-    for (size_t i = 0; i < v.size; ++i)
-        printf("zv[%d] = %ld\n", i, v.data[i]);
+void vector_init(struct vector* v);
+void vector_destroy(struct vector* v);
+void vector_append(struct vector* v, long thing);
 
-    vector_destroy(&v);
-}
-
-int main(int argc, char* argv[])
-{
-    (void)argc;
-    (void)argv;
-
-    dummy();
-    vector_test();
-
-    return 0;
-}
+#endif /* ! _VECTOR_H_ */
