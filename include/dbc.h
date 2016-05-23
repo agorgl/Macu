@@ -28,84 +28,75 @@
 /*   ' ') '( (/                                                                                                      */
 /*     '   '  `                                                                                                      */
 /*********************************************************************************************************************/
-#include <stdio.h>
-#include "macu.h"
-#include "vector.h"
-#include "hashmap.h"
-#include "dbc.h"
+#ifndef _DBC_H_
+#define _DBC_H_
 
-size_t hash_fn(void* key)
-{
-    long h = (long) key;
-    return (13 * h) ^ (h >> 15);
+/* Design by Contract helper */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Utility macro that stringifies given parameter */
+#define TO_STRING(x) #x
+
+/* Utility macro that is used to stringify compiler macros like __LINE__ */
+#define COMPILER_MACRO_TO_STRING(x) TO_STRING(x)
+
+/* Type of the assert handler functions */
+typedef void(*dbc_assert_handler_type)(const char*);
+
+/* Sets the assertion handler to the given function */
+void dbc_set_assert_handler(dbc_assert_handler_type);
+
+/* Retrieves the current assertion handler */
+dbc_assert_handler_type dbc_get_assert_handler();
+
+/* Sets the default exit code used by predifined assertions */
+void dbc_set_assert_exit_code(int ec);
+
+/* Gets the default exit code used by assertions */
+int dbc_get_assert_exit_code();
+
+/* Predifined assertion handlers */
+void dbc_gui_assert_handler(const char* message);
+void dbc_shell_assert_handler(const char* message);
+
+/* The library assert macro */
+#define DBC_ASSERT(condition, error_message)        \
+{                                                   \
+    if ((condition) == 0) {                         \
+        dbc_get_assert_handler()(error_message);    \
+    }                                               \
 }
 
-void hm_iter(void* key, void* value)
-{
-    printf("hm[%ld] = %ld\n", (long)key, (long) value);
+#if defined(DEBUG_ONLY_ASSERTIONS) && !_DEBUG
+#define require(condition) (void)0
+#define require_msg(condition, error_message) (void)0
+#define ensure(condition) (void)0
+#define ensure_msg(condition, error_message) (void)0
+#else
+/* Requires the given expression to be true. Commonly used in preconditions */
+#define require(condition) \
+    DBC_ASSERT(condition,   "Error: expression \"" #condition "\" is required to be true\n" \
+                            "File: " __FILE__ "\n"                                          \
+                            "Line: " COMPILER_MACRO_TO_STRING(__LINE__))
+
+/* Require that uses a custom user message to be displayed on failure */
+#define require_msg(condition, error_message) DBC_ASSERT(condition, error_message)
+
+/* Ensures that the given expression is true. Commonly used in postconditions*/
+#define ensure(condition) \
+    DBC_ASSERT(condition,   "Error: expression \"" #condition "\" should have evaluated to true\n"  \
+                            "File: " __FILE__ "\n"                                                  \
+                            "Line: " COMPILER_MACRO_TO_STRING(__LINE__))
+
+/* Ensure version that uses custom user message to be displayed on failure */
+#define ensure_msg(condition, error_message) DBC_ASSERT(condition, error_message)
+#endif
+
+#ifdef __cplusplus
 }
+#endif
 
-int hm_eql(void* k1, void* k2)
-{
-    return k1 == k2;
-}
-
-void hashmap_test()
-{
-    struct hashmap hm;
-    const int hashmap_test_data[] = {
-        77, 69,
-        63, 39,
-        99, 21,
-        28, 60,
-        9, 53,
-        85, 12,
-        43, 64,
-        67, 30,
-        76, 26,
-        55, 86,
-        96, 58,
-        73, 16,
-        94, 27,
-    };
-    hashmap_init(&hm, hash_fn, hm_eql);
-    for (size_t i = 0; i < sizeof(hashmap_test_data) / sizeof(int); i+=2) {
-        int key = hashmap_test_data[i];
-        int value = hashmap_test_data[i + 1];
-        hashmap_put(&hm, (void*)key, (void*)value);
-    }
-    hashmap_put(&hm, (void*)43, (void*)43);
-    hashmap_iter(&hm, hm_iter);
-    ensure(hashmap_exists(&hm, (void*)85));
-    hashmap_destroy(&hm);
-}
-
-void vector_test()
-{
-    struct vector v;
-    vector_init(&v);
-
-    /* Apend test data to vector */
-    vector_append(&v, 5);
-    vector_append(&v, 1);
-    vector_append(&v, 8);
-    vector_append(&v, 7);
-
-    /* Show them */
-    for (size_t i = 0; i < v.size; ++i)
-        printf("zv[%d] = %ld\n", i, v.data[i]);
-
-    vector_destroy(&v);
-}
-
-int main(int argc, char* argv[])
-{
-    (void)argc;
-    (void)argv;
-
-    dummy();
-    vector_test();
-    hashmap_test();
-
-    return 0;
-}
+#endif /* ! _DBC_H_ */
