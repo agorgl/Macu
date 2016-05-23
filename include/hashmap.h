@@ -28,82 +28,62 @@
 /*   ' ') '( (/                                                                                                      */
 /*     '   '  `                                                                                                      */
 /*********************************************************************************************************************/
-#include <stdio.h>
-#include "macu.h"
-#include "vector.h"
-#include "hashmap.h"
+#ifndef _HASHMAP_H_
+#define _HASHMAP_H_
 
-size_t hash_fn(void* key)
-{
-    long h = (long) key;
-    return (13 * h) ^ (h >> 15);
-}
+#include <stddef.h>
 
-void hm_iter(void* key, void* value)
-{
-    printf("hm[%ld] = %ld\n", (long)key, (long) value);
-}
+#define HASHMAP_OK 0
+#define HASHMAP_FAIL -1
+#define HASHMAP_MISSING -2
 
-int hm_eql(void* k1, void* k2)
-{
-    return k1 == k2;
-}
+struct hashmap_pair {
+    void* key;
+    void* value;
+};
 
-void hashmap_test()
-{
-    struct hashmap hm;
-    const int hashmap_test_data[] = {
-        77, 69,
-        63, 39,
-        99, 21,
-        28, 60,
-        9, 53,
-        85, 12,
-        43, 64,
-        67, 30,
-        76, 26,
-        55, 86,
-        96, 58,
-        73, 16,
-        94, 27,
-    };
-    hashmap_init(&hm, hash_fn, hm_eql);
-    for (size_t i = 0; i < sizeof(hashmap_test_data) / sizeof(int); i+=2) {
-        int key = hashmap_test_data[i];
-        int value = hashmap_test_data[i + 1];
-        hashmap_put(&hm, (void*)key, (void*)value);
-    }
-    hashmap_put(&hm, (void*)43, (void*)43);
-    hashmap_iter(&hm, hm_iter);
-    hashmap_destroy(&hm);
-}
+struct hashmap_node {
+    struct hashmap_pair data;
+    struct hashmap_node* next;
+};
 
-void vector_test()
-{
-    struct vector v;
-    vector_init(&v);
+/* Hash func signature */
+typedef size_t(*hashmap_hash_fn)(void* key);
+/* Equality comparison func signature */
+typedef int(*hashmap_eql_fn)(void* key1, void* key2);
 
-    /* Apend test data to vector */
-    vector_append(&v, 5);
-    vector_append(&v, 1);
-    vector_append(&v, 8);
-    vector_append(&v, 7);
+struct hashmap {
+    /* Array of lists */
+    struct hashmap_node** buckets;
+    /* Current capacity of the buckets array */
+    size_t capacity;
+    /* Size of the hashmap */
+    size_t size;
+    /* Hash function used */
+    hashmap_hash_fn hashfn;
+    /* Comparison function used */
+    hashmap_eql_fn eqlfn;
+};
 
-    /* Show them */
-    for (size_t i = 0; i < v.size; ++i)
-        printf("zv[%d] = %ld\n", i, v.data[i]);
 
-    vector_destroy(&v);
-}
+/* Init/Destroy funcs */
+void hashmap_init(struct hashmap* hm, hashmap_hash_fn hfn, hashmap_eql_fn efn);
+void hashmap_destroy(struct hashmap* hm);
 
-int main(int argc, char* argv[])
-{
-    (void)argc;
-    (void)argv;
+/* Iterate through hashmap */
+typedef void(*hm_iter_fn)(void* key, void* value);
+void hashmap_iter(struct hashmap* hm, hm_iter_fn iter_cb);
 
-    dummy();
-    vector_test();
-    hashmap_test();
+/*
+ * Set the value for specified key in hashmap
+ * Creates pair if given key it does not exist, overwrites value if it does
+ */
+void hashmap_put(struct hashmap* hm, void* key, void* value);
 
-    return 0;
-}
+/* Retrieves ptr to the value assosiated with the specified key or 0 if it does not exist */
+void* hashmap_get(struct hashmap* hm, void* key);
+
+/* Checks if pair with given key exists */
+int hashmap_exists(struct hashmap* hm, void* key);
+
+#endif /* ! _HASHMAP_H_ */
