@@ -31,6 +31,10 @@
 #ifndef _HASHMAP_H_
 #define _HASHMAP_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 
 #define HASHMAP_OK 0
@@ -85,5 +89,9 @@ void* hashmap_get(struct hashmap* hm, void* key);
 
 /* Checks if pair with given key exists */
 int hashmap_exists(struct hashmap* hm, void* key);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ! _HASHMAP_H_ */

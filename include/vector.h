@@ -31,6 +31,10 @@
 #ifndef _VECTOR_H_
 #define _VECTOR_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 
 struct vector {
@@ -42,5 +46,9 @@ struct vector {
 void vector_init(struct vector* v);
 void vector_destroy(struct vector* v);
 void vector_append(struct vector* v, long thing);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ! _VECTOR_H_ */

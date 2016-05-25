@@ -31,6 +31,14 @@
 #ifndef _MACU_H_
 #define _MACU_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void dummy();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ! _MACU_H_ */
