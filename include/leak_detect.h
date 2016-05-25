@@ -28,97 +28,25 @@
 /*   ' ') '( (/                                                                                                      */
 /*     '   '  `                                                                                                      */
 /*********************************************************************************************************************/
-#include <stdio.h>
-#include "macu.h"
-#include "vector.h"
-#include "hashmap.h"
-#include "dbc.h"
-#include "leak_detect.h"
+#ifndef _LEAK_DETECT_H_
+#define _LEAK_DETECT_H_
 
-size_t hash_fn(void* key)
-{
-    long h = (long) key;
-    return (13 * h) ^ (h >> 15);
-}
+#include <stdlib.h>
 
-void hm_iter(void* key, void* value)
-{
-    printf("hm[%ld] = %ld\n", (long)key, (long) value);
-}
+#define malloc(size) ldmalloc(size, __FILE__, __LINE__)
+#define calloc(num, size) ldcalloc(num, size, __FILE__, __LINE__)
+#define realloc(ptr, size) ldrealloc(ptr, size, __FILE__, __LINE__)
+#define free(addr) ldfree(addr)
 
-int hm_eql(void* k1, void* k2)
-{
-    return k1 == k2;
-}
+/* Public interface */
+void ldinit();
+void print_leaks();
+void ldshutdown();
 
-void hashmap_test()
-{
-    struct hashmap hm;
-    const int hashmap_test_data[] = {
-        77, 69,
-        63, 39,
-        99, 21,
-        28, 60,
-        9, 53,
-        85, 12,
-        43, 64,
-        67, 30,
-        76, 26,
-        55, 86,
-        96, 58,
-        73, 16,
-        94, 27,
-    };
-    hashmap_init(&hm, hash_fn, hm_eql);
-    for (size_t i = 0; i < sizeof(hashmap_test_data) / sizeof(int); i+=2) {
-        int key = hashmap_test_data[i];
-        int value = hashmap_test_data[i + 1];
-        hashmap_put(&hm, (void*)key, (void*)value);
-    }
-    hashmap_put(&hm, (void*)43, (void*)43);
-    hashmap_iter(&hm, hm_iter);
-    ensure(hashmap_exists(&hm, (void*)85));
-    hashmap_destroy(&hm);
-}
+/* Injected functions */
+void* ldmalloc(size_t size, const char* file, unsigned int line);
+void* ldcalloc(size_t num, size_t size, const char* file, unsigned int line);
+void* ldrealloc(void* ptr, size_t size, const char* file, unsigned int line);
+void ldfree(void* addr);
 
-void vector_test()
-{
-    struct vector v;
-    vector_init(&v);
-
-    /* Apend test data to vector */
-    vector_append(&v, 5);
-    vector_append(&v, 1);
-    vector_append(&v, 8);
-    vector_append(&v, 7);
-
-    /* Show them */
-    for (size_t i = 0; i < v.size; ++i)
-        printf("zv[%d] = %ld\n", i, v.data[i]);
-
-    vector_destroy(&v);
-}
-
-void leak_detect_test()
-{
-    ldinit();
-    int* x = malloc(5);
-    *x = 3;
-    print_leaks();
-    ldshutdown();
-}
-
-int main(int argc, char* argv[])
-{
-    (void)argc;
-    (void)argv;
-
-    dummy();
-    vector_test();
-    hashmap_test();
-    /*
-    leak_detect_test();
-     */
-
-    return 0;
-}
+#endif /* ! _LEAK_DETECT_H_ */
