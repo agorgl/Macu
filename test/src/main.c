@@ -83,18 +83,25 @@ void hashmap_test()
 
 void vector_test()
 {
+    struct sample_pod { int x, y, z; };
     struct vector v;
-    vector_init(&v);
+    vector_init(&v, sizeof(struct sample_pod));
 
     /* Apend test data to vector */
-    vector_append(&v, 5);
-    vector_append(&v, 1);
-    vector_append(&v, 8);
-    vector_append(&v, 7);
+    struct sample_pod sd = { 0, 0, 0 };
+    vector_append(&v, (unsigned char*)&sd);
+    sd.x = 5; sd.z = 7;
+    vector_append(&v, (unsigned char*)&sd);
+    sd.x = 1; sd.y = 2; sd.z = 3;
+    vector_append(&v, (unsigned char*)&sd);
+    sd.x = 4; sd.y = 5; sd.z = 7;
+    vector_append(&v, (unsigned char*)&sd);
 
     /* Show them */
-    for (size_t i = 0; i < v.size; ++i)
-        printf("zv[%d] = %ld\n", i, v.data[i]);
+    for (size_t i = 0; i < v.size; ++i) {
+        struct sample_pod* spp = vector_at(&v, i);
+        printf("zv[%d] = (%d, %d, %d)\n", i, spp->x, spp->y, spp->z);
+    }
 
     vector_destroy(&v);
 }

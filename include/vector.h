@@ -38,14 +38,16 @@ extern "C" {
 #include <stddef.h>
 
 struct vector {
-    long* data;
+    unsigned char* data;
+    size_t item_sz;
     size_t capacity;
     size_t size;
 };
 
-void vector_init(struct vector* v);
+void vector_init(struct vector* v, size_t item_sz);
 void vector_destroy(struct vector* v);
-void vector_append(struct vector* v, long thing);
+void vector_append(struct vector* v, unsigned char* thing);
+void* vector_at(struct vector* v, size_t index);
 
 #ifdef __cplusplus
 }
