@@ -116,10 +116,10 @@ void* hashmap_get(struct hashmap* hm, void* key)
     struct hashmap_node* n = 0;
     for (n = hm->buckets[index]; n != 0; n = n->next) {
         if (hm->eqlfn(key, n->data.key)) {
-            break;
+            return &n->data.value;
         }
     }
-    return n;
+    return 0;
 }
 
 int hashmap_exists(struct hashmap* hm, void* key)
