@@ -35,7 +35,11 @@
 extern "C" {
 #endif
 
-void dummy();
+#include "vector.h"
+#include "hashmap.h"
+#include "leak_detect.h"
+#include "tinycthread.h"
+#include "dbc.h"
 
 #ifdef __cplusplus
 }

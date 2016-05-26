@@ -30,10 +30,6 @@
 /*********************************************************************************************************************/
 #include <stdio.h>
 #include "macu.h"
-#include "vector.h"
-#include "hashmap.h"
-#include "dbc.h"
-#include "leak_detect.h"
 
 size_t hash_fn(void* key)
 {
@@ -120,7 +116,6 @@ int main(int argc, char* argv[])
     (void)argc;
     (void)argv;
 
-    dummy();
     vector_test();
     hashmap_test();
     /*
