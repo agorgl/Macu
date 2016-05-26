@@ -30,7 +30,7 @@ static void vector_grow(struct vector* v)
     memset(v->data + v->size, 0, (v->capacity - v->size) * v->item_sz);
 }
 
-void vector_append(struct vector* v, unsigned char* thing)
+void vector_append(struct vector* v, void* thing)
 {
     if (v->capacity - v->size < 1) {
         vector_grow(v);

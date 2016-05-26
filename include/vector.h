@@ -46,7 +46,7 @@ struct vector {
 
 void vector_init(struct vector* v, size_t item_sz);
 void vector_destroy(struct vector* v);
-void vector_append(struct vector* v, unsigned char* thing);
+void vector_append(struct vector* v, void* thing);
 void* vector_at(struct vector* v, size_t index);
 
 #ifdef __cplusplus
