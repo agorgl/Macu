@@ -25,9 +25,9 @@ void vector_destroy(struct vector* v)
 
 static void vector_grow(struct vector* v)
 {
-    v->capacity = (v->capacity * 2 + v->item_sz);
+    v->capacity = (v->capacity * 2 + 1);
     v->data = realloc(v->data, v->capacity * v->item_sz);
-    memset(v->data + v->size, 0, (v->capacity - v->size) * v->item_sz);
+    memset(v->data + v->size * v->item_sz, 0, (v->capacity - v->size) * v->item_sz);
 }
 
 void vector_append(struct vector* v, void* thing)
