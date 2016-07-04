@@ -261,7 +261,8 @@ int webserv_run(struct webserv* ws)
     ws->running = 1;
     slog(SL_INFO, "Waiting for connections...\n");
     while(ws->running) {
-        struct sockaddr_storage raddr; int sockaddrlen;
+        struct sockaddr_storage raddr;
+        int sockaddrlen = sizeof(struct sockaddr_storage);
         sock_t cs = accept(ls, (struct sockaddr*)&raddr, &sockaddrlen);
         if (!sock_valid(cs)) {
             slog(SL_ERROR, "Could not accept connection\n");
