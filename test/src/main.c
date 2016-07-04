@@ -110,11 +110,13 @@ void vector_test()
 
 void leak_detect_test()
 {
-    ldinit();
+    ld_init();
     int* x = malloc(5);
     *x = 3;
-    print_leaks();
-    ldshutdown();
+    free(x);
+    x = malloc(7);
+    ld_print_leaks();
+    ld_shutdown();
 }
 
 int main(int argc, char* argv[])
@@ -124,9 +126,7 @@ int main(int argc, char* argv[])
 
     vector_test();
     hashmap_test();
-    /*
     leak_detect_test();
-     */
 
     return 0;
 }

@@ -33,20 +33,20 @@
 
 #include <stdlib.h>
 
-#define malloc(size) ldmalloc(size, __FILE__, __LINE__)
-#define calloc(num, size) ldcalloc(num, size, __FILE__, __LINE__)
-#define realloc(ptr, size) ldrealloc(ptr, size, __FILE__, __LINE__)
-#define free(addr) ldfree(addr)
+#define malloc(size) ld_malloc(size, __FILE__, __LINE__)
+#define calloc(num, size) ld_calloc(num, size, __FILE__, __LINE__)
+#define realloc(ptr, size) ld_realloc(ptr, size, __FILE__, __LINE__)
+#define free(addr) ld_free(addr)
 
 /* Public interface */
-void ldinit();
-void print_leaks();
-void ldshutdown();
+void ld_init();
+void ld_print_leaks();
+void ld_shutdown();
 
 /* Injected functions */
-void* ldmalloc(size_t size, const char* file, unsigned int line);
-void* ldcalloc(size_t num, size_t size, const char* file, unsigned int line);
-void* ldrealloc(void* ptr, size_t size, const char* file, unsigned int line);
-void ldfree(void* addr);
+void* ld_malloc(size_t size, const char* file, unsigned int line);
+void* ld_calloc(size_t num, size_t size, const char* file, unsigned int line);
+void* ld_realloc(void* ptr, size_t size, const char* file, unsigned int line);
+void ld_free(void* addr);
 
 #endif /* ! _LEAK_DETECT_H_ */
