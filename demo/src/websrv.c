@@ -33,6 +33,7 @@
 #include <stdarg.h>
 #include <sock.h>
 #include <tinycthread.h>
+#include <vector.h>
 #include <http_parser.h>
 #include <leak_detect.h>
 
@@ -40,8 +41,9 @@
 
 typedef void(*webserv_route_fn)();
 struct webserv {
-    int running;
-    webserv_route_fn route_fn;
+    int running; /* Master switch */
+    sock_t ls; /* Socket listening for connections */
+    webserv_route_fn route_fn; /* Routing function */
 };
 
 /* Connected client state */
@@ -98,9 +100,8 @@ static void slog(enum webserv_log_level ll, const char* fmt, ...)
         case SL_DEBUG:
             vprintf(nfmt, vl);
     }
-
-    free(nfmt);
     va_end(vl);
+    free(nfmt);
 }
 
 static int on_message_begin(struct http_parser* p)
@@ -147,10 +148,10 @@ static int webserv_parse_request(struct webserv_cli_data* client_data)
         memset(reqbuf, 0, sizeof(reqbuf));
         int len = recv(client_data->sock, reqbuf, BUFSIZE, 0);
         if (len == 0) {
-            slog(SL_DEBUG, "Client disconnected\n");
+            slog(SL_DEBUG, "Connection closed by client\n");
             return -1;
         } else if (len == -1) {
-            slog(SL_DEBUG, "Client disconnected Abnormally\n");
+            slog(SL_DEBUG, "Client connection dropped\n");
             return -1;
         }
         slog(SL_DEBUG, "Received %d length packet\n", len);
@@ -196,6 +197,7 @@ static int webserv_cli_thrd(void* arg)
     if(client_data->url)
         free(client_data->url);
     sock_close(client_data->sock);
+    slog(SL_DEBUG, "Client disconnected: %s\n", client_data->ipstr);
     free(thrd_params);
     return 0;
 }
@@ -234,28 +236,32 @@ int webserv_run(struct webserv* ws)
     }
 
     /* Create listen socket */
-    sock_t ls = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
-    if (!sock_valid(ls)) {
+    ws->ls = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+    if (!sock_valid(ws->ls)) {
         slog(SL_ERROR, "Invalid socket error\n");
         return 1;
     }
 
     /* Bind */
-    status = bind(ls, servinfo->ai_addr, servinfo->ai_addrlen);
+    status = bind(ws->ls, servinfo->ai_addr, servinfo->ai_addrlen);
     if (status != 0) {
         slog(SL_ERROR, "Could not bind on port: %s\n", port);
-        sock_close(ls);
+        sock_close(ws->ls);
         return 1;
     }
     freeaddrinfo(servinfo);
 
     /* Listen */
-    status = listen(ls, 3);
+    status = listen(ws->ls, 3);
     if (status != 0) {
         slog(SL_ERROR, "Could not listen on port: %s\n", port);
-        sock_close(ls);
+        sock_close(ws->ls);
         return 1;
     }
+
+    /* Thread identifiers */
+    struct vector thrd_ids;
+    vector_init(&thrd_ids, sizeof(thrd_t));
 
     /* Accept loop */
     ws->running = 1;
@@ -263,7 +269,7 @@ int webserv_run(struct webserv* ws)
     while(ws->running) {
         struct sockaddr_storage raddr;
         int sockaddrlen = sizeof(struct sockaddr_storage);
-        sock_t cs = accept(ls, (struct sockaddr*)&raddr, &sockaddrlen);
+        sock_t cs = accept(ws->ls, (struct sockaddr*)&raddr, &sockaddrlen);
         if (!sock_valid(cs)) {
             slog(SL_ERROR, "Could not accept connection\n");
             continue;
@@ -290,17 +296,31 @@ int webserv_run(struct webserv* ws)
         thrd_t thrd;
         status = thrd_create(&thrd, webserv_cli_thrd, cd);
         if (status == thrd_success) {
-            thrd_detach(thrd);
+            vector_append(&thrd_ids, &thrd);
+            /* thrd_detach(thrd); */
         } else {
             slog(SL_WARN, "Could not create client thread\n");
             sock_close(cs);
         }
     }
 
+    /* Join all threads */
+    for (size_t i = 0; i < thrd_ids.size; ++i) {
+        thrd_t* tid = vector_at(&thrd_ids, i);
+        thrd_join(*tid, 0);
+    }
+    vector_destroy(&thrd_ids);
+
     /* Close listen socket */
-    sock_close(ls);
+    sock_close(ws->ls);
     /* Normal termination */
     return 0;
+}
+
+void webserv_shutdown(struct webserv* ws)
+{
+    ws->running = 0;
+    sock_close(ws->ls);
 }
 
 void webserv_route(struct webserv* ws, struct webserv_cli_data* client_data)
@@ -311,7 +331,7 @@ void webserv_route(struct webserv* ws, struct webserv_cli_data* client_data)
     /* Check for die request */
     if (strncmp("/die", client_data->url, 4) == 0) {
         slog(SL_INFO, "Shutting down...\n");
-        ws->running = 0;
+        webserv_shutdown(ws);
     }
 
     /* Send response */
@@ -328,7 +348,7 @@ int main(int argc, char* argv[])
 {
     (void) argc;
     (void) argv;
-    ldinit();
+    ld_init();
     sock_init();
 
     struct webserv ws;
@@ -337,7 +357,7 @@ int main(int argc, char* argv[])
     webserv_destroy(&ws);
 
     sock_destroy();
-    print_leaks();
-    ldshutdown();
+    ld_print_leaks();
+    ld_shutdown();
     return 0;
 }
