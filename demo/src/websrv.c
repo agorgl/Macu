@@ -74,12 +74,16 @@ static void slog(enum webserv_log_level ll, const char* fmt, ...)
     switch(ll) {
         case SL_ERROR:
             prefix = "[ERROR]";
+            break;
         case SL_WARN:
             prefix = "[WARN]";
+            break;
         case SL_INFO:
             prefix = "[INFO]";
+            break;
         case SL_DEBUG:
             prefix = "[DEBUG]";
+            break;
     }
 
     /* Construct full log format to pass to printing functions */
