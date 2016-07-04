@@ -72,8 +72,14 @@ void hashmap_test()
         hashmap_put(&hm, (void*)key, (void*)value);
     }
     hashmap_put(&hm, (void*)43, (void*)43);
-    hashmap_iter(&hm, hm_iter);
     ensure(hashmap_exists(&hm, (void*)85));
+    hashmap_remove(&hm, (void*)85);
+    hashmap_remove(&hm, (void*)67);
+    hashmap_remove(&hm, (void*)76);
+    hashmap_remove(&hm, (void*)96);
+    ensure(!hashmap_exists(&hm, (void*)76));
+    printf("hm.size = %d\n", hm.size);
+    hashmap_iter(&hm, hm_iter);
     hashmap_destroy(&hm);
 }
 
