@@ -101,9 +101,11 @@ static void slog(enum webserv_log_level ll, const char* fmt, ...)
         case SL_ERROR:
         case SL_WARN:
             vfprintf(stderr, nfmt, vl);
+            break;
         case SL_INFO:
         case SL_DEBUG:
             vprintf(nfmt, vl);
+            break;
     }
     va_end(vl);
     free(nfmt);
