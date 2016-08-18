@@ -6,7 +6,14 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <limits.h>
 #include "tinycthread.h"
+
+#ifdef _MSC_VER
+#define PATH_LIM _MAX_PATH
+#else
+#define PATH_LIM PATH_MAX
+#endif
 
 #undef malloc
 #undef calloc
@@ -28,7 +35,7 @@ Address: %#x\n\
 /* Allocation entry */
 struct ld_alloc_info {
     size_t size;
-    char filename[_MAX_PATH];
+    char filename[PATH_LIM];
     unsigned int line;
 };
 
