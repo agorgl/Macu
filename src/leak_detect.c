@@ -88,8 +88,8 @@ static void add_leak(struct ld_alloc_db* db, void* ptr, struct ld_alloc_info* in
 
 static struct ld_alloc_info* get_leak(struct ld_alloc_db* db, void* ptr)
 {
-    struct ld_alloc_info* ai = hashmap_get(&db->allocations, ptr);
-    return ai;
+    struct ld_alloc_info** ai = hashmap_get(&db->allocations, ptr);
+    return *ai;
 }
 
 static void remove_leak(struct ld_alloc_db* db, void* ptr)
