@@ -98,6 +98,9 @@ void vector_test()
     vector_append(&v, &sd);
     sd.x = 4; sd.y = 5; sd.z = 7;
     vector_append(&v, &sd);
+    /* Insert test data to vector */
+    sd.x = 2; sd.y = 3; sd.z = 9;
+    vector_insert(&v, 2, &sd);
 
     /* Show them */
     for (size_t i = 0; i < v.size; ++i) {
