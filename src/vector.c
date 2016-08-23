@@ -64,6 +64,26 @@ void vector_insert(struct vector* v, size_t index, void* thing)
     vector_set(v, index, thing);
 }
 
+void vector_remove_range(struct vector* v, size_t start, size_t end)
+{
+    assert(start < v->size);
+    assert(end < v->size + 1);
+    assert(start < end);
+    assert(end - start <= v->size);
+
+    memmove(
+        v->data + start * v->item_sz,
+        v->data + end * v->item_sz,
+        (v->size - end) * v->item_sz
+    );
+    v->size -= end - start;
+}
+
+void vector_remove(struct vector* v, size_t index)
+{
+    vector_remove_range(v, index, index + 1);
+}
+
 void* vector_at(struct vector* v, size_t index)
 {
     return v->data + v->item_sz * index;

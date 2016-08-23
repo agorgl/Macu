@@ -101,6 +101,8 @@ void vector_test()
     /* Insert test data to vector */
     sd.x = 2; sd.y = 3; sd.z = 9;
     vector_insert(&v, 2, &sd);
+    /* Remove test data from vector */
+    vector_remove(&v, 3);
 
     /* Show them */
     for (size_t i = 0; i < v.size; ++i) {
