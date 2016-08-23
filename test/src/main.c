@@ -29,6 +29,7 @@
 /*     '   '  `                                                                                                      */
 /*********************************************************************************************************************/
 #include <stdio.h>
+#include <stdint.h>
 #include "macu.h"
 
 size_t hash_fn(void* key)
@@ -69,7 +70,7 @@ void hashmap_test()
     for (size_t i = 0; i < sizeof(hashmap_test_data) / sizeof(int); i+=2) {
         int key = hashmap_test_data[i];
         int value = hashmap_test_data[i + 1];
-        hashmap_put(&hm, (void*)key, (void*)value);
+        hashmap_put(&hm, (void*)(uintptr_t)key, (void*)(uintptr_t)value);
     }
     hashmap_put(&hm, (void*)43, (void*)43);
     ensure(hashmap_exists(&hm, (void*)85));
@@ -78,7 +79,7 @@ void hashmap_test()
     hashmap_remove(&hm, (void*)76);
     hashmap_remove(&hm, (void*)96);
     ensure(!hashmap_exists(&hm, (void*)76));
-    printf("hm.size = %d\n", hm.size);
+    printf("hm.size = %zu\n", hm.size);
     hashmap_iter(&hm, hm_iter);
     hashmap_destroy(&hm);
 }
@@ -107,7 +108,7 @@ void vector_test()
     /* Show them */
     for (size_t i = 0; i < v.size; ++i) {
         struct sample_pod* spp = vector_at(&v, i);
-        printf("zv[%d] = (%d, %d, %d)\n", i, spp->x, spp->y, spp->z);
+        printf("zv[%zu] = (%d, %d, %d)\n", i, spp->x, spp->y, spp->z);
     }
 
     vector_destroy(&v);
