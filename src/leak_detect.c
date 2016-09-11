@@ -67,8 +67,8 @@ void ld_init()
 
 static void allocations_free_iter(hm_ptr key, hm_ptr value)
 {
-    struct ld_alloc_info* ai = (struct ld_alloc_info*) value;
-    free((void*)key);
+    struct ld_alloc_info* ai = (struct ld_alloc_info*)hm_pcast(value);
+    free(hm_pcast(key));
     free(ai);
 }
 
@@ -82,21 +82,21 @@ void ld_shutdown()
 static void add_leak(struct ld_alloc_db* db, void* ptr, struct ld_alloc_info* info)
 {
     mtx_lock(&lock);
-    hashmap_put(&db->allocations, (hm_ptr)ptr, (hm_ptr)info);
+    hashmap_put(&db->allocations, hm_cast(ptr), hm_cast(info));
     mtx_unlock(&lock);
 }
 
 static struct ld_alloc_info* get_leak(struct ld_alloc_db* db, void* ptr)
 {
-    struct ld_alloc_info** ai = (struct ld_alloc_info**)hashmap_get(&db->allocations, (hm_ptr)ptr);
+    struct ld_alloc_info** ai = (struct ld_alloc_info**)hashmap_get(&db->allocations, hm_cast(ptr));
     return *ai;
 }
 
 static void remove_leak(struct ld_alloc_db* db, void* ptr)
 {
     mtx_lock(&lock);
-    struct ld_alloc_info* alloc_info = get_leak(db, ptr);
-    hashmap_remove(&db->allocations, (hm_ptr)ptr);
+    struct ld_alloc_info* alloc_info = (struct ld_alloc_info*)get_leak(db, ptr);
+    hashmap_remove(&db->allocations, hm_cast(ptr));
     free(alloc_info);
     mtx_unlock(&lock);
 }
@@ -151,12 +151,12 @@ void ld_free(void* addr)
 
 static void allocations_print_iter(hm_ptr key, hm_ptr value)
 {
-    struct ld_alloc_info* ai = (struct ld_alloc_info*) value;
+    struct ld_alloc_info* ai = (struct ld_alloc_info*)hm_pcast(value);
     printf(PRINT_LEAK_STR,
            ai->filename,
            ai->line,
            ai->size,
-           (unsigned long)key);
+           (size_t)key);
 }
 
 void ld_print_leaks()

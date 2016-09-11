@@ -45,6 +45,10 @@ extern "C" {
 /* Hashmap key and value type long enough to hold any 64 bit value */
 typedef int64_t hm_ptr;
 
+/* Helper casts to avoid conversion warnings */
+#define hm_cast(x) ((hm_ptr)(uintptr_t)x)
+#define hm_pcast(x) ((void*)(uintptr_t)x)
+
 struct hashmap_pair {
     hm_ptr key;
     hm_ptr value;
