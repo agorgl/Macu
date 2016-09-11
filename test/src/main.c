@@ -32,18 +32,18 @@
 #include <stdint.h>
 #include "macu.h"
 
-size_t hash_fn(void* key)
+size_t hash_fn(hm_ptr key)
 {
     long h = (long) key;
     return (13 * h) ^ (h >> 15);
 }
 
-void hm_iter(void* key, void* value)
+void hm_iter(hm_ptr key, hm_ptr value)
 {
-    printf("hm[%ld] = %ld\n", (long)key, (long) value);
+    printf("hm[%ld] = %ld\n", (long)key, (long)value);
 }
 
-int hm_eql(void* k1, void* k2)
+int hm_eql(hm_ptr k1, hm_ptr k2)
 {
     return k1 == k2;
 }
@@ -70,15 +70,15 @@ void hashmap_test()
     for (size_t i = 0; i < sizeof(hashmap_test_data) / sizeof(int); i+=2) {
         int key = hashmap_test_data[i];
         int value = hashmap_test_data[i + 1];
-        hashmap_put(&hm, (void*)(uintptr_t)key, (void*)(uintptr_t)value);
+        hashmap_put(&hm, key, value);
     }
-    hashmap_put(&hm, (void*)43, (void*)43);
-    ensure(hashmap_exists(&hm, (void*)85));
-    hashmap_remove(&hm, (void*)85);
-    hashmap_remove(&hm, (void*)67);
-    hashmap_remove(&hm, (void*)76);
-    hashmap_remove(&hm, (void*)96);
-    ensure(!hashmap_exists(&hm, (void*)76));
+    hashmap_put(&hm, 43, 43);
+    ensure(hashmap_exists(&hm, 85));
+    hashmap_remove(&hm, 85);
+    hashmap_remove(&hm, 67);
+    hashmap_remove(&hm, 76);
+    hashmap_remove(&hm, 96);
+    ensure(!hashmap_exists(&hm, 76));
     printf("hm.size = %zu\n", hm.size);
     hashmap_iter(&hm, hm_iter);
     hashmap_destroy(&hm);
