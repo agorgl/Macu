@@ -46,8 +46,8 @@ extern "C" {
 typedef int64_t hm_ptr;
 
 /* Helper casts to avoid conversion warnings */
-#define hm_cast(x) ((hm_ptr)(uintptr_t)x)
-#define hm_pcast(x) ((void*)(uintptr_t)x)
+#define hm_cast(x) ((hm_ptr)(uintptr_t)(x))
+#define hm_pcast(x) ((void*)(uintptr_t)(x))
 
 struct hashmap_pair {
     hm_ptr key;
