@@ -4,6 +4,7 @@
 
 #include "leak_detect.h"
 #include <string.h>
+#define __USE_MINGW_ANSI_STDIO 1
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
