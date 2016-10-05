@@ -40,6 +40,7 @@ extern "C" {
 #include "leak_detect.h"
 #include "tinycthread.h"
 #include "dbc.h"
+#include "log.h"
 
 #ifdef __cplusplus
 }
