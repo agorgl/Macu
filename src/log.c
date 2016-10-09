@@ -25,7 +25,7 @@ static char* log_type_to_string(enum log_type type)
     }
 }
 
-static char* bake_log(const char* msg, enum log_type type)
+static char* log_bake(const char* msg, enum log_type type)
 {
     /* Convert type to string */
     char* type_str = log_type_to_string(type);
@@ -35,7 +35,7 @@ static char* bake_log(const char* msg, enum log_type type)
     size_t type_length = strlen(type_str);
 
     /* Calculate total output string length */
-    size_t length = type_length + 1 + msg_length;
+    size_t length = type_length + 2 + msg_length;
 
     /* Allocate space for log */
     char* log = (char*) malloc(length);
@@ -49,13 +49,13 @@ static char* bake_log(const char* msg, enum log_type type)
     return log;
 }
 
-static void print_log(const char* msg, enum log_type type)
+static void log_print(const char* msg, enum log_type type)
 {
     /* Choose output stream */
     FILE* out = (type == INFO || type == DEBUG) ? stdout : stderr;
 
     /* Create log */
-    char* log = bake_log(msg, type);
+    char* log = log_bake(msg, type);
 
     /* Print */
     fprintf(out, log);
@@ -68,7 +68,7 @@ static void print_log(const char* msg, enum log_type type)
 /* -------------------------------------------------- */
 /* Header implementation                              */
 /* -------------------------------------------------- */
-void log_info(const char* msg)  { print_log(msg, INFO);  }
-void log_debug(const char* msg) { print_log(msg, DEBUG); }
-void log_warn(const char* msg)  { print_log(msg, WARN);  }
-void log_err(const char* msg)   { print_log(msg, ERR);   }
+void log_info(const char* msg)  { log_print(msg, INFO);  }
+void log_debug(const char* msg) { log_print(msg, DEBUG); }
+void log_warn(const char* msg)  { log_print(msg, WARN);  }
+void log_err(const char* msg)   { log_print(msg, ERR);   }
