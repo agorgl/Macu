@@ -5,5 +5,4 @@ ifeq ($(OS), Windows_NT)
 else
 	LIBS += pthread
 endif
-ADDINCS = ../include
-ADDLIBDIR = ../lib
+MOREDEPS = ..
