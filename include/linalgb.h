@@ -68,9 +68,10 @@ float radians(float degrees);
  * Vector Maths
  * -------------------------------------------------- */
 /* vec2 */
-typedef struct {
-    float x;
-    float y;
+typedef union {
+    struct { float x, y; };
+    struct { float s, t; };
+    float xy[2];
 } vec2;
 
 vec2 vec2_new(float x, float y);
@@ -119,10 +120,12 @@ vec2 vec2_smoothstep(vec2 v1, vec2 v2, float amount);
 vec2 vec2_smootherstep(vec2 v1, vec2 v2, float amount);
 
 /* vec3 */
-typedef struct {
-    float x;
-    float y;
-    float z;
+typedef union {
+    struct { float x, y, z; };
+    float xyz[3];
+    struct { float r, g, b; };
+    float rgb[3];
+    struct { float s, t, p; };
 } vec3;
 
 vec3 vec3_new(float x, float y, float z);
@@ -179,11 +182,12 @@ vec3 vec3_smoothstep(vec3 v1, vec3 v2, float amount);
 vec3 vec3_smootherstep(vec3 v1, vec3 v2, float amount);
 
 /* vec4 */
-typedef struct {
-    float x;
-    float y;
-    float z;
-    float w;
+typedef union {
+    struct { float x, y, z, w; };
+    float xyzw[4];
+    struct { float r, g, b, a; };
+    float rgba[4];
+    struct { float s, t, p, q; };
 } vec4;
 
 vec4 vec4_new(float x, float y, float z, float w);
@@ -300,9 +304,18 @@ vec3 quat_dual_mul_vec3_rot(quat_dual q, vec3 v);
  * Matrix Maths
  * -------------------------------------------------- */
 /* mat2 */
-typedef struct {
-    float xx; float xy;
-    float yx; float yy;
+typedef union {
+    struct {
+#ifdef LINALGB_ROW_MAJOR
+        float xx; float xy;
+        float yx; float yy;
+#else
+        float xx; float yx;
+        float xy; float yy;
+#endif
+    };
+    float m[4];
+    float m2[2][2];
 } mat2;
 
 mat2 mat2_id();
@@ -320,10 +333,20 @@ void mat2_print(mat2 m);
 mat2 mat2_rotation(float a);
 
 /* mat3 */
-typedef struct {
-    float xx; float xy; float xz;
-    float yx; float yy; float yz;
-    float zx; float zy; float zz;
+typedef union {
+    struct {
+#ifdef LINALGB_ROW_MAJOR
+        float xx; float xy; float xz;
+        float yx; float yy; float yz;
+        float zx; float zy; float zz;
+#else
+        float xx; float yx; float zx;
+        float xy; float yy; float zy;
+        float xz; float yz; float zz;
+#endif
+    };
+    float m[9];
+    float m2[3][3];
 } mat3;
 
 mat3 mat3_id();
@@ -348,11 +371,22 @@ mat3 mat3_rotation_z(float a);
 mat3 mat3_rotation_angle_axis(float angle, vec3 axis);
 
 /* mat4 */
-typedef struct {
-    float xx; float xy; float xz; float xw;
-    float yx; float yy; float yz; float yw;
-    float zx; float zy; float zz; float zw;
-    float wx; float wy; float wz; float ww;
+typedef union {
+    struct {
+#ifdef LINALGB_ROW_MAJOR
+        float xx; float xy; float xz; float xw;
+        float yx; float yy; float yz; float yw;
+        float zx; float zy; float zz; float zw;
+        float wx; float wy; float wz; float ww;
+#else
+        float xx; float yx; float zx; float wx;
+        float xy; float yy; float zy; float wy;
+        float xz; float yz; float zz; float wz;
+        float xw; float yw; float zw; float ww;
+#endif
+    };
+    float m[16];
+    float m2[4][4];
 } mat4;
 
 mat4 mat4_id();

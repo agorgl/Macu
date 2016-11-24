@@ -364,7 +364,6 @@ vec2 vec2_from_string(char* s)
     vec2 v;
     v.x = d1;
     v.y = d2;
-
     return v;
 }
 
@@ -683,7 +682,6 @@ vec3 vec3_from_string(char* s)
     v.x = d1;
     v.y = d2;
     v.z = d3;
-
     return v;
 }
 
@@ -990,7 +988,6 @@ vec4 vec4_from_string(char* s)
     v.y = d2;
     v.z = d3;
     v.w = d4;
-
     return v;
 }
 
@@ -1421,7 +1418,7 @@ quat_dual quat_dual_new(quat real, quat dual)
 
 quat_dual quat_dual_id()
 {
-    return quat_dual_new(quat_id(), vec4_zero());
+    return quat_dual_new(quat_id(), quat_new(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 quat_dual quat_dual_transform(quat q, vec3 t)
@@ -1551,7 +1548,6 @@ mat2 mat2_inverse(mat2 m)
     ret.xy = fac * -m.xy;
     ret.yx = fac * -m.yx;
     ret.yy = fac * m.xx;
-
     return ret;
 }
 
@@ -1708,7 +1704,6 @@ mat3 mat3_inverse(mat3 m)
     ret.zx = fac * mat2_det(mat2_new(m.yx, m.yy, m.zx, m.zy));
     ret.zy = fac * mat2_det(mat2_new(m.xy, m.xx, m.zy, m.zx));
     ret.zz = fac * mat2_det(mat2_new(m.xx, m.xy, m.yx, m.yy));
-
     return ret;
 }
 
@@ -2144,61 +2139,50 @@ void mat4_print(mat4 m)
 
 mat4 mat4_view_look_at(vec3 position, vec3 target, vec3 up)
 {
-    vec3 zaxis = vec3_normalize(vec3_sub(target, position));
-    vec3 xaxis = vec3_normalize(vec3_cross(up, zaxis));
-    vec3 yaxis = vec3_cross(zaxis, xaxis);
+    vec3 f = vec3_normalize(vec3_sub(target, position));
+    vec3 s = vec3_normalize(vec3_cross(f, up));
+    vec3 u = vec3_cross(s, f);
 
     mat4 view_matrix = mat4_id();
-    view_matrix.xx = xaxis.x;
-    view_matrix.xy = xaxis.y;
-    view_matrix.xz = xaxis.z;
+    view_matrix.xx = s.x;
+    view_matrix.xy = s.y;
+    view_matrix.xz = s.z;
 
-    view_matrix.yx = yaxis.x;
-    view_matrix.yy = yaxis.y;
-    view_matrix.yz = yaxis.z;
+    view_matrix.yx = u.x;
+    view_matrix.yy = u.y;
+    view_matrix.yz = u.z;
 
-    view_matrix.zx = -zaxis.x;
-    view_matrix.zy = -zaxis.y;
-    view_matrix.zz = -zaxis.z;
+    view_matrix.zx = -f.x;
+    view_matrix.zy = -f.y;
+    view_matrix.zz = -f.z;
 
-    view_matrix = mat4_mul_mat4(view_matrix, mat4_translation(vec3_neg(position)));
+    view_matrix.xw = -vec3_dot(s, position);
+    view_matrix.yw = -vec3_dot(u, position);
+    view_matrix.zw =  vec3_dot(f, position);
     return view_matrix;
 }
 
 mat4 mat4_perspective(float fov, float near_clip, float far_clip, float ratio)
 {
-    float right, left, bottom, top;
-
-    right = -(near_clip * tanf(fov));
-    left = -right;
-
-    top = ratio * near_clip * tanf(fov);
-    bottom = -top;
-
+    const float tan_half_fov = tanf(fov / 2.0f);
     mat4 proj_matrix = mat4_zero();
-    proj_matrix.xx = (2.0f * near_clip) / (right - left);
-    proj_matrix.yy = (2.0f * near_clip) / (top - bottom);
-    proj_matrix.xz = (right + left) / (right - left);
-    proj_matrix.yz = (top + bottom) / (top - bottom);
-    proj_matrix.zz = (-far_clip - near_clip) / (far_clip - near_clip);
+    proj_matrix.xx = 1.0f / (ratio * tan_half_fov);
+    proj_matrix.yy = 1.0f / tan_half_fov;
     proj_matrix.wz = -1.0f;
-    proj_matrix.zw = (-(2.0f * near_clip) * far_clip) / (far_clip - near_clip);
-
+    proj_matrix.zz = - (far_clip + near_clip) / (far_clip - near_clip);
+    proj_matrix.zw = - (2.0f * far_clip * near_clip) / (far_clip - near_clip);
     return proj_matrix;
 }
 
 mat4 mat4_orthographic(float left, float right, float bottom, float top, float clip_near, float clip_far)
 {
     mat4 m = mat4_id();
-
-    m.xx = 2 / (right - left);
-    m.yy = 2 / (top - bottom);
-    m.zz = 1 / (clip_near - clip_far);
-
-    m.xw = -1 - 2 * left / (right - left);
-    m.yw = 1 + 2 * top / (bottom - top);
-    m.zw = clip_near / (clip_near - clip_far);
-
+    m.xx = 2.0f / (right - left);
+    m.yy = 2.0f / (top - bottom);
+    m.xw = - (right + left) / (right - left);
+    m.yw = - (top + bottom) / (top - bottom);
+    m.zz = - 2.0f / (clip_far - clip_near);
+    m.zw = - (clip_far + clip_near) / (clip_far - clip_near);
     return m;
 }
 
@@ -2301,7 +2285,7 @@ mat4 mat4_rotation_euler(float x, float y, float z)
     return m;
 }
 
-mat4 mat4_rotation_quat(vec4 q)
+mat4 mat4_rotation_quat(quat q)
 {
     float x2 = q.x + q.x;
     float y2 = q.y + q.y;
