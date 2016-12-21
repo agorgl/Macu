@@ -57,9 +57,12 @@ static void log_print(const char* msg, enum log_type type)
     /* Create log */
     char* log = log_bake(msg, type);
 
+    /* Append newline to log */
+    log = realloc(log, strlen(log) + 1 /* newline */ + 1 /* terminating char */);
+    strncat(log, "\n", 1);
+
     /* Print */
     fputs(log, out);
-    fprintf(out, "\n");
 
     /* Free allocated space for log after printing */
     free(log);
