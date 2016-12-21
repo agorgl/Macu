@@ -58,7 +58,7 @@ static void log_print(const char* msg, enum log_type type)
     char* log = log_bake(msg, type);
 
     /* Print */
-    fprintf(out, log);
+    fputs(log, out);
     fprintf(out, "\n");
 
     /* Free allocated space for log after printing */
