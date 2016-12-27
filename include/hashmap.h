@@ -101,6 +101,10 @@ hm_ptr* hashmap_get(struct hashmap* hm, hm_ptr key);
 /* Checks if pair with given key exists */
 int hashmap_exists(struct hashmap* hm, hm_ptr key);
 
+/* Premade hash/eql functions */
+size_t hm_str_hash(hm_ptr key);
+int hm_str_eql(hm_ptr k1, hm_ptr k2);
+
 #ifdef __cplusplus
 }
 #endif

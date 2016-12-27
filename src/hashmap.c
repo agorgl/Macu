@@ -160,3 +160,18 @@ int hashmap_exists(struct hashmap* hm, hm_ptr key)
 {
     return hashmap_get(hm, key) != 0;
 }
+
+size_t hm_str_hash(hm_ptr key)
+{
+    const char* str = hm_pcast(key);
+    unsigned long hash = 5381;
+    int c;
+    while ((c = *str++) != 0)
+        hash = (hash * 33 + c);
+    return hash;
+}
+
+int hm_str_eql(hm_ptr k1, hm_ptr k2)
+{
+    return strcmp((const char*)hm_pcast(k1), (const char*)hm_pcast(k2)) == 0;
+}
