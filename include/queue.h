@@ -28,23 +28,22 @@
 /*   ' ') '( (/                                                                                                      */
 /*     '   '  `                                                                                                      */
 /*********************************************************************************************************************/
-#ifndef _MACU_H_
-#define _MACU_H_
+#ifndef _QUEUE_H_
+#define _QUEUE_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdlib.h>
 
-#include "vector.h"
-#include "queue.h"
-#include "hashmap.h"
-#include "leak_detect.h"
-#include "tinycthread.h"
-#include "dbc.h"
-#include "log.h"
+struct queue {
+    void* front;
+    void* back;
+    size_t elem_sz;
+    size_t size;
+};
 
-#ifdef __cplusplus
-}
-#endif
+void queue_init(struct queue* q, size_t elem_sz);
+void queue_push(struct queue* q, void* v);
+void* queue_front(struct queue* q);
+void queue_pop(struct queue* q);
+void queue_destroy(struct queue* q);
 
-#endif /* ! _MACU_H_ */
+#endif /* ! _QUEUE_H_ */

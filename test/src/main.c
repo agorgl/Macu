@@ -116,6 +116,37 @@ void vector_test()
     vector_destroy(&v);
 }
 
+void queue_test()
+{
+    int x;
+    struct queue q;
+    queue_init(&q, sizeof(int));
+    /* Push data to queue */
+    printf("Pushing data to queue...\n");
+    x = 5; queue_push(&q, &x);
+    x = 3; queue_push(&q, &x);
+    x = 8; queue_push(&q, &x);
+    x = 1; queue_push(&q, &x);
+    /* Pop some data */
+    x = *(int*) queue_front(&q);
+    queue_pop(&q);
+    printf("q[pop] = %d\n", x);
+    x = *(int*) queue_front(&q);
+    queue_pop(&q);
+    printf("q[pop] = %d\n", x);
+    /* Push some more */
+    printf("Pushing data to queue (sz=%ld)...\n", q.size);
+    x = 2; queue_push(&q, &x);
+    x = 3; queue_push(&q, &x);
+    x = 4; queue_push(&q, &x);
+    /* Pop a last one */
+    x = *(int*) queue_front(&q);
+    queue_pop(&q);
+    printf("q[pop] = %d\n", x);
+    printf("Final queue sz=%ld\n", q.size);
+    queue_destroy(&q);
+}
+
 void leak_detect_test()
 {
     ld_init();
@@ -165,6 +196,7 @@ int main(int argc, char* argv[])
 
     vector_test();
     hashmap_test();
+    queue_test();
     leak_detect_test();
     log_test();
 
