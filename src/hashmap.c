@@ -175,3 +175,13 @@ int hm_str_eql(hm_ptr k1, hm_ptr k2)
 {
     return strcmp((const char*)hm_pcast(k1), (const char*)hm_pcast(k2)) == 0;
 }
+
+size_t hm_u64_hash(hm_ptr key)
+{
+    return (uint64_t)key;
+}
+
+int hm_u64_eql(hm_ptr k1, hm_ptr k2)
+{
+    return (uint64_t)k1 == (uint64_t)k2;
+}
