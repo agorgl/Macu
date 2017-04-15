@@ -36,6 +36,7 @@ extern "C" {
 #endif
 
 #include "vector.h"
+#include "list.h"
 #include "queue.h"
 #include "hashmap.h"
 #include "leak_detect.h"

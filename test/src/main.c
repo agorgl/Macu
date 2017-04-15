@@ -116,6 +116,32 @@ void vector_test()
     vector_destroy(&v);
 }
 
+void list_test()
+{
+    struct foo {
+        int data;
+        struct list_head list;
+    };
+
+    LIST_HEAD(foo_list);
+    struct foo foo1 = {
+        .data = 5,
+        .list = LIST_HEAD_INIT(foo1.list)
+    };
+    struct foo foo2;
+    foo2.data = 9;
+    INIT_LIST_HEAD(&foo2.list);
+
+    list_add(&foo1.list, &foo_list);
+    list_add(&foo2.list, &foo_list);
+
+    struct list_head* node;
+    list_for_each(node, &foo_list) {
+        struct foo* f = list_entry(node, struct foo, list);
+        printf("%d\n", f->data);
+    }
+}
+
 void queue_test()
 {
     int x;
@@ -194,10 +220,17 @@ int main(int argc, char* argv[])
     (void)argc;
     (void)argv;
 
+    printf("Performing test for [vector]\n");
     vector_test();
+    printf("Performing test for [list]\n");
+    list_test();
+    printf("Performing test for [hashmap]\n");
     hashmap_test();
+    printf("Performing test for [queue]\n");
     queue_test();
+    printf("Performing test for [leak_detect]\n");
     leak_detect_test();
+    printf("Performing test for [log]\n");
     log_test();
 
     return 0;
