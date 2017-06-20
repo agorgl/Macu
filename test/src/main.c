@@ -83,6 +83,11 @@ void hashmap_test()
     ensure(!hashmap_exists(&hm, 76));
     printf("hm.size = %zu\n", hm.size);
     hashmap_iter(&hm, hm_iter);
+
+    struct hashmap_iter it;
+    for (hashmap_iter_first(&hm, &it); it.p; hashmap_iter_next(&it))
+        printf("hm[%ld] = %ld\n", (long)it.p->key, (long)it.p->value);
+
     hashmap_destroy(&hm);
 }
 

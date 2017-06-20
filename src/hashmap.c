@@ -47,6 +47,39 @@ void hashmap_iter(struct hashmap* hm, hm_iter_fn iter_cb)
     }
 }
 
+void hashmap_iter_init(struct hashmap* hm, struct hashmap_iter* it)
+{
+    it->map = hm;
+    it->bucket = 0;
+    it->next = 0;
+}
+
+struct hashmap_pair* hashmap_iter_next(struct hashmap_iter* it)
+{
+    struct hashmap_node* cur = it->next;
+    for (;;) {
+        if (cur) {
+            it->next = cur->next;
+            it->p = &cur->data;
+            break;
+        }
+
+        if (it->bucket >= it->map->capacity) {
+            it->p = 0;
+            break;
+        }
+
+        cur = it->map->buckets[it->bucket++];
+    }
+    return it->p;
+}
+
+struct hashmap_pair* hashmap_iter_first(struct hashmap* hm, struct hashmap_iter* it)
+{
+    hashmap_iter_init(hm, it);
+    return hashmap_iter_next(it);
+}
+
 static void hashmap_put_internal(struct hashmap* hm, hm_ptr key, hm_ptr value)
 {
     /* Get index from the given key's hash */

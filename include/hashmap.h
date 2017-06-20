@@ -38,10 +38,6 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
-#define HASHMAP_OK 0
-#define HASHMAP_FAIL -1
-#define HASHMAP_MISSING -2
-
 /* Hashmap key and value type long enough to hold any 64 bit value */
 typedef int64_t hm_ptr;
 
@@ -85,6 +81,16 @@ void hashmap_destroy(struct hashmap* hm);
 /* Iterate through hashmap */
 typedef void(*hm_iter_fn)(hm_ptr key, hm_ptr value);
 void hashmap_iter(struct hashmap* hm, hm_iter_fn iter_cb);
+
+struct hashmap_iter {
+    struct hashmap* map;
+    struct hashmap_node* next;
+    size_t bucket;
+    struct hashmap_pair* p; /* Pointer to data pair */
+};
+void hashmap_iter_init(struct hashmap* hm, struct hashmap_iter* it);
+struct hashmap_pair* hashmap_iter_next(struct hashmap_iter* it);
+struct hashmap_pair* hashmap_iter_first(struct hashmap* hm, struct hashmap_iter* it);
 
 /*
  * Set the value for specified key in hashmap
