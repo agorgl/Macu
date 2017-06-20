@@ -92,6 +92,9 @@ void hashmap_iter_init(struct hashmap* hm, struct hashmap_iter* it);
 struct hashmap_pair* hashmap_iter_next(struct hashmap_iter* it);
 struct hashmap_pair* hashmap_iter_first(struct hashmap* hm, struct hashmap_iter* it);
 
+#define hashmap_for(hm, it) \
+    for (hashmap_iter_first(&(hm), &it); it.p; hashmap_iter_next(&it))
+
 /*
  * Set the value for specified key in hashmap
  * Creates pair if given key it does not exist, overwrites value if it does
