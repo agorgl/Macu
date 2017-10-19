@@ -1,6 +1,6 @@
 PRJTYPE = Executable
 LIBS = macu
-ifeq ($(OS), Windows_NT)
+ifeq ($(TARGET_OS), Windows_NT)
 	LIBS += user32
 else
 	LIBS += pthread
