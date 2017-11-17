@@ -50,7 +50,7 @@ extern "C" {
     #endif
 #elif __APPLE__
     #include "TargetConditionals.h"
-    #if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+    #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
         #define OS_IOS
         #if TARGET_IPHONE_SIMULATOR
             /* iOS Simulator */
